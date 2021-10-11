@@ -1,6 +1,6 @@
 [package]
-name = "task_utils"
-authors = ["CDL Team"]
+name = "task_limiter"
+authors = [":)"]
 version = "0.1.0"
 edition = "2018"
 license = "Apache-2.0"
