@@ -1,0 +1,15 @@
+cargo-features = ["named-profiles"]
+
+[workspace]
+members = [
+  "crates/*",
+]
+
+[profile.ci]
+inherits = "dev"
+debug = false
+incremental = false
+
+[profile.release]
+lto = true
+codegen-units = 1
