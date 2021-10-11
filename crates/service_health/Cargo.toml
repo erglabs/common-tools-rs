@@ -1,0 +1,16 @@
+[package]
+authors = ["CDL Team"]
+name = "service_health_utils"
+version = "0.1.0"
+edition = "2018"
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+settings_utils           = { path = "../settings" }
+
+lazy_static = "1.4.0"
+hyper       = "0.14.11"
+tracing     = "0.1.26"
+tokio       = "1.10.0"
