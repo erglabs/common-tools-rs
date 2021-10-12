@@ -25,9 +25,9 @@ impl TaskLimiter {
     }
 
     pub async fn run<Fun, Fut>(&self, task: Fun)
-    where
-        Fun: FnOnce() -> Fut + Send + 'static,
-        Fut: Future<Output = ()> + Send + 'static,
+        where
+            Fun: FnOnce() -> Fut + Send + 'static,
+            Fut: Future<Output = ()> + Send + 'static,
     {
         let semaphore = Arc::clone(&self.semaphore);
         let permit = semaphore.acquire_owned().await;
