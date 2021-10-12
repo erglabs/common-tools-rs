@@ -1,11 +1,11 @@
 use std::{env, fmt::Debug};
 
 use anyhow::bail;
-use communication_utils::publisher::CommonPublisher;
 use config::{Config, Environment, File};
 use serde::Deserialize;
 
-pub mod apps;
+
+// todo write docs here
 
 pub fn load_settings<'de, T: Deserialize<'de> + Debug>() -> anyhow::Result<T> {
     let env = env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
@@ -26,16 +26,16 @@ pub fn load_settings<'de, T: Deserialize<'de> + Debug>() -> anyhow::Result<T> {
 
     if let Some(home) = dirs::home_dir() {
         s.merge(
-            File::with_name(&format!("{}/.cdl/default.toml", home.to_string_lossy(),))
+            File::with_name(&format!("{}/.config/default.toml", home.to_string_lossy(),))
                 .required(false),
         )?;
         s.merge(
-            File::with_name(&format!("{}/.cdl/{}.toml", home.to_string_lossy(), env,))
+            File::with_name(&format!("{}/.config/{}.toml", home.to_string_lossy(), env,))
                 .required(false),
         )?;
         s.merge(
             File::with_name(&format!(
-                "{}/.cdl/{}/default.toml",
+                "{}/.config/{}/default.toml",
                 home.to_string_lossy(),
                 env
             ))
@@ -43,7 +43,7 @@ pub fn load_settings<'de, T: Deserialize<'de> + Debug>() -> anyhow::Result<T> {
         )?;
         s.merge(
             File::with_name(&format!(
-                "{}/.cdl/{}/{}.toml",
+                "{}/.config/{}/{}.toml",
                 home.to_string_lossy(),
                 env,
                 exe
@@ -52,10 +52,10 @@ pub fn load_settings<'de, T: Deserialize<'de> + Debug>() -> anyhow::Result<T> {
         )?;
     }
 
-    s.merge(File::with_name(".cdl/default.toml").required(false))?;
-    s.merge(File::with_name(&format!(".cdl/{}.toml", exe)).required(false))?;
-    s.merge(File::with_name(&format!(".cdl/{}/default.toml", env)).required(false))?;
-    s.merge(File::with_name(&format!(".cdl/{}/{}.toml", env, exe)).required(false))?;
+    s.merge(File::with_name(".config/default.toml").required(false))?;
+    s.merge(File::with_name(&format!(".config/{}.toml", exe)).required(false))?;
+    s.merge(File::with_name(&format!(".config/{}/default.toml", env)).required(false))?;
+    s.merge(File::with_name(&format!(".config/{}/{}.toml", env, exe)).required(false))?;
 
     if let Ok(custom_dir) = env::var("CDL_CONFIG") {
         s.merge(File::with_name(&format!("{}/default.toml", custom_dir)).required(false))?;
@@ -69,17 +69,4 @@ pub fn load_settings<'de, T: Deserialize<'de> + Debug>() -> anyhow::Result<T> {
     let settings = s.try_into()?;
 
     Ok(settings)
-}
-
-pub async fn publisher<'a>(
-    kafka: Option<&'a str>,
-    amqp: Option<&'a str>,
-    grpc: Option<()>,
-) -> anyhow::Result<CommonPublisher> {
-    Ok(match (kafka, amqp, grpc) {
-        (Some(brokers), _, _) => CommonPublisher::new_kafka(brokers).await?,
-        (_, Some(exchange), _) => CommonPublisher::new_amqp(exchange).await?,
-        (_, _, Some(_)) => CommonPublisher::new_grpc().await?,
-        _ => anyhow::bail!("Unsupported publisher specification"),
-    })
 }
